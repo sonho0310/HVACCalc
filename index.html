@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Duct/AG Calculator</title>
+    <title>HVAC Unified Tools</title>
     
-    <!-- 1. React & ReactDOM CDN -->
+    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- 2. Babel CDN -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- 3. Tailwind CSS CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
@@ -26,7 +26,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
+            animation: fadeIn 0.4s ease-out forwards;
         }
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
@@ -35,63 +35,44 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans">
+<body class="bg-slate-50 text-slate-800 font-sans">
     
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useMemo } = React;
 
         // --- ICONS ---
-        const IconDuct = ({ className }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/></svg>
-        );
-        const IconGrille = ({ className }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
-        );
-        const IconArrowRight = ({ className }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-        );
-        const IconGauge = ({ className }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></svg>
-        );
-        const IconTrash = ({ className }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-        );
-        const IconCircle = ({ className }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-        );
-        const IconSettings = ({ className }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-        );
+        const IconDuct = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/></svg>);
+        const IconGrille = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>);
+        const IconWind = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"></path><path d="M9.6 4.6A2 2 0 1 1 11 8H2"></path><path d="M12.6 19.4A2 2 0 1 0 14 16H2"></path></svg>);
+        const IconTrash = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>);
+        const IconSettings = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>);
+        const IconList = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>);
+        const IconEdit3 = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>);
 
-        // --- HELPER COMPONENTS ---
-        const FormulaText = ({ children }) => (
-            <div className="text-[10px] text-slate-400 italic text-right mt-1 font-serif tracking-wide">{children}</div>
-        );
-
-        const FloatingInput = ({ id, label, value, onChange, type = "number", step = "1", suffix, formula, disabled }) => (
-            <div className={`relative z-0 w-full group mt-1 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                <input
-                    type={type} id={id}
-                    className="block py-2.5 px-0 w-full text-lg text-slate-800 bg-transparent border-0 border-b-2 border-slate-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer font-bold font-mono"
-                    placeholder=" " 
-                    value={value} 
-                    onChange={(e) => onChange(e.target.value)} 
-                    onFocus={(e) => e.target.select()}
-                    step={step} 
-                    autoComplete="off"
-                />
-                <label htmlFor={id} className="peer-focus:font-bold absolute text-sm text-slate-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 font-semibold whitespace-nowrap">
-                    {label}
+        // --- SHARED COMPONENT: MINIMAL INPUT (Style mới) ---
+        const MinimalInput = ({ label, subLabel, value, onChange, onFocus, type = "number", step, disabled }) => (
+            <div className={`w-full ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 truncate">
+                    {label} <span className="font-normal text-slate-300 normal-case italic">/ {subLabel}</span>
                 </label>
-                {suffix && <span className="absolute right-0 top-2 text-xs text-slate-400 font-bold">{suffix}</span>}
-                {formula && <FormulaText>{formula}</FormulaText>}
+                <input
+                    type={type}
+                    step={step}
+                    className="block w-full py-1 border-b border-slate-200 text-lg font-bold text-slate-700 placeholder-slate-300 focus:outline-none focus:border-blue-500 focus:text-blue-600 transition-colors bg-transparent"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    onFocus={(e) => {
+                        e.target.select();
+                        if (onFocus) onFocus();
+                    }}
+                    disabled={disabled}
+                />
             </div>
         );
 
-        // --- HELPER: COLOR CLASS ---
-        // Hàm này dùng chung để kiểm tra Vận tốc hoặc Tổn thất so với giới hạn
+        // Hàm helper màu sắc
         const getCheckColor = (actual, limit, isFriction = false) => {
             if (!actual || !limit) return "text-slate-500";
             const act = parseFloat(actual);
@@ -101,7 +82,161 @@
             return isFriction ? "text-red-600 font-bold" : "text-amber-600 font-bold";
         };
 
-        // --- COMPONENT 1: DUCT CALCULATOR ---
+        // ==========================================
+        // 1. AIRFLOW CALCULATOR (Tích hợp vào)
+        // ==========================================
+        const AirflowCalculator = () => {
+            const [flowLs, setFlowLs] = useState(15000);
+            const [flowM3h, setFlowM3h] = useState(54000);
+            const [totalDiffusers, setTotalDiffusers] = useState(20);
+            const [tableUnit, setTableUnit] = useState('l/s'); 
+            const [tableData, setTableData] = useState([]);
+
+            const handleLsChange = (val) => {
+                const newVal = Number(val);
+                setFlowLs(newVal);
+                setFlowM3h(Math.round(newVal * 3.6));
+                setTableUnit('l/s'); 
+            };
+
+            const handleM3hChange = (val) => {
+                const newVal = Number(val);
+                setFlowM3h(newVal);
+                setFlowLs(Math.round(newVal / 3.6));
+                setTableUnit('m³/h'); 
+            };
+
+            const totalAirflowForCalc = tableUnit === 'l/s' ? flowLs : flowM3h;
+
+            const airflowPerDiffuser = useMemo(() => {
+                if (totalDiffusers <= 0) return 0;
+                return parseFloat((totalAirflowForCalc / totalDiffusers).toFixed(1)); 
+            }, [totalAirflowForCalc, totalDiffusers]);
+
+            useEffect(() => {
+                if (totalDiffusers <= 0) {
+                    setTableData([]);
+                    return;
+                }
+                const data = [];
+                for (let i = 1; i <= totalDiffusers; i++) {
+                    let val = (totalAirflowForCalc / totalDiffusers) * i;
+                    if (i === parseInt(totalDiffusers)) { val = totalAirflowForCalc; }
+                    data.push({ id: i, cumulative: Math.round(val) });
+                }
+                setTableData(data);
+            }, [totalAirflowForCalc, totalDiffusers]);
+
+            const handleTableEdit = (id, newValue) => {
+                const newData = tableData.map(row => {
+                    if (row.id === id) return { ...row, cumulative: Number(newValue) };
+                    return row;
+                });
+                setTableData(newData);
+            };
+
+            return (
+                <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+                    {/* Header Airflow */}
+                    <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-slate-200/60 shadow-sm flex items-center gap-4">
+                        <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2.5 rounded-lg shadow-md shadow-blue-200 text-white">
+                            <IconWind className="w-6 h-6"/>
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-slate-900 leading-tight">Airflow Calculator</h2>
+                            <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">Tính toán phân phối gió</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                        <div className="space-y-4 md:sticky md:top-6">
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+                                <div className="flex items-center gap-2 mb-4 text-slate-400 uppercase text-[10px] font-bold tracking-wider border-b border-slate-100 pb-2">
+                                    <IconSettings className="w-3 h-3" />
+                                    <span>Input Parameters / Thông số đầu vào</span>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-2 gap-8">
+                                        <MinimalInput label="Flow (L/s)" subLabel="Lưu lượng" value={flowLs} onChange={handleLsChange} />
+                                        <MinimalInput label="Flow (m³/h)" subLabel="Lưu lượng" value={flowM3h} onChange={handleM3hChange} />
+                                    </div>
+                                    <MinimalInput label="No. of Diffusers" subLabel="Số miệng gió" value={totalDiffusers} onChange={(v) => setTotalDiffusers(Number(v))} />
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 relative overflow-hidden group hover:shadow-md transition-shadow">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 rounded-l-xl"></div>
+                                <div className="relative z-10">
+                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">
+                                        Airflow per Diffuser / <span className="font-normal normal-case italic">Lưu lượng 1 miệng</span>
+                                    </p>
+                                    <div className="flex items-baseline gap-2 mt-1">
+                                        <span className="text-4xl font-bold text-blue-600 tracking-tight">
+                                            {Math.round(airflowPerDiffuser) === airflowPerDiffuser ? airflowPerDiffuser : airflowPerDiffuser.toFixed(1)}
+                                        </span>
+                                        <span className="text-slate-400 text-xs font-medium bg-slate-100 px-1.5 py-0.5 rounded">{tableUnit}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col h-auto">
+                            <div className="px-4 py-3 border-b border-slate-100 flex flex-wrap gap-4 items-center justify-between sticky top-0 z-20 bg-white/95 backdrop-blur-sm rounded-t-xl">
+                                <div className="flex items-center gap-2">
+                                    <IconList className="w-4 h-4 text-blue-500" />
+                                    <div className="flex flex-col">
+                                        <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wide">Cumulative Schedule</h2>
+                                        <span className="text-[10px] text-slate-400 italic">Bảng cộng dồn</span>
+                                    </div>
+                                </div>
+                                <div className="flex bg-slate-50 p-0.5 rounded-lg border border-slate-100">
+                                    <button onClick={() => setTableUnit('l/s')} className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${tableUnit === 'l/s' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>L/s</button>
+                                    <button onClick={() => setTableUnit('m³/h')} className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${tableUnit === 'm³/h' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>m³/h</button>
+                                </div>
+                            </div>
+                            <div className="p-0">
+                                <table className="w-full text-left border-collapse">
+                                    <thead className="bg-slate-50/50">
+                                        <tr>
+                                            <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase w-14 text-center tracking-wider border-b border-slate-100">No. <span className="font-normal normal-case italic ml-0.5">/ STT</span></th>
+                                            <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase text-right tracking-wider border-b border-slate-100">Cumulative <span className="font-normal normal-case italic ml-0.5">/ Cộng dồn</span> <span className="normal-case">({tableUnit})</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-50">
+                                        {tableData.map((row, index) => {
+                                            const isLast = index === tableData.length - 1;
+                                            return (
+                                                <tr key={row.id} className={`group hover:bg-slate-50 transition-colors ${isLast ? 'bg-blue-50/30' : ''}`}>
+                                                    <td className="px-4 py-2 text-center">
+                                                        <div className={`w-6 h-6 mx-auto rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${isLast ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 bg-slate-100 group-hover:text-blue-600 group-hover:bg-blue-100'}`}>{row.id}</div>
+                                                    </td>
+                                                    <td className="px-4 py-1 text-right relative">
+                                                        <div className="relative group/input">
+                                                            <input type="number" value={row.cumulative} onChange={(e) => handleTableEdit(row.id, e.target.value)} className={`w-full text-right bg-transparent border-b border-transparent focus:border-blue-400 focus:outline-none transition-all py-1 px-1 text-sm font-mono tracking-tight ${isLast ? 'text-blue-600 font-bold' : 'text-slate-700 hover:bg-white hover:shadow-sm hover:border-slate-200'}`} />
+                                                            <IconEdit3 className="w-3 h-3 absolute left-0 top-1/2 -translate-y-1/2 text-slate-300 opacity-0 group-hover/input:opacity-100 transition-opacity pointer-events-none" />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                                {tableData.length === 0 && (
+                                    <div className="py-12 flex flex-col items-center justify-center text-slate-300">
+                                        <IconWind className="w-8 h-8 mb-2 opacity-20"/>
+                                        <span className="text-xs">No data / Không có dữ liệu</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // 2. DUCT CALCULATOR (Cập nhật giao diện Minimal)
+        // ==========================================
         const DuctCalculator = () => {
             const [mode, setMode] = useState('flow');
             const [flowLS, setFlowLS] = useState('');
@@ -109,21 +244,16 @@
             const [oldW, setOldW] = useState('');
             const [oldH, setOldH] = useState('');
             
-            // Method Selection
             const [calcMethod, setCalcMethod] = useState('velocity');
             const [velocityInput, setVelocityInput] = useState(6);
             const [frictionInput, setFrictionInput] = useState(1);
-            
-            // Advanced Settings
-            const [roughness, setRoughness] = useState(0.15); // Default 0.15 for Galvanized Steel (Practical)
+            const [roughness, setRoughness] = useState(0.15);
 
-            // Custom Size State
             const [fixedH, setFixedH] = useState('');
             const [fixedW, setFixedW] = useState('');
             const [customVelocity, setCustomVelocity] = useState(null);
             const [customFriction, setCustomFriction] = useState(null);
 
-            // Results
             const [resFlow, setResFlow] = useState(0);
             const [resRound, setResRound] = useState(null);
             const [suggestedSizes, setSuggestedSizes] = useState([]);
@@ -131,30 +261,20 @@
             const [showRound, setShowRound] = useState(false);
             const [showSettings, setShowSettings] = useState(false);
 
-            // --- PHYSICS FUNCTIONS ---
+            // --- Physics Logic (Giữ nguyên logic cũ) ---
             function calculateFriction(d_mm, v) {
                 if (!d_mm || !v || d_mm <= 0 || v <= 0) return 0;
-                const rho = 1.204; 
-                const nu = 1.51e-5; 
-                const epsilon = roughness * 1e-3; // Convert mm to m
-                const d_m = d_mm / 1000;
-                const Re = (v * d_m) / nu;
-                let f = 0.02;
-                // Colebrook iteration
+                const rho = 1.204; const nu = 1.51e-5; const epsilon = roughness * 1e-3; const d_m = d_mm / 1000;
+                const Re = (v * d_m) / nu; let f = 0.02;
                 for (let i = 0; i < 10; i++) {
-                    const term1 = epsilon / (3.7 * d_m);
-                    const term2 = 2.51 / (Re * Math.sqrt(f));
+                    const term1 = epsilon / (3.7 * d_m); const term2 = 2.51 / (Re * Math.sqrt(f));
                     const next_f = 1 / Math.pow(-2 * Math.log10(term1 + term2), 2);
                     if (Math.abs(next_f - f) < 1e-6) { f = next_f; break; }
                     f = next_f;
                 }
                 return (f * rho * Math.pow(v, 2)) / (2 * d_m);
             }
-
-            function calculateDeq(w, h) {
-                return 1.30 * Math.pow((w * h)**0.625 / (w + h)**0.25, 1);
-            }
-
+            function calculateDeq(w, h) { return 1.30 * Math.pow((w * h)**0.625 / (w + h)**0.25, 1); }
             function calculateD_from_Friction(Q_m3s, P_loss) {
                 if(Q_m3s <= 0 || P_loss <= 0) return 0;
                 let D_guess = 0.5;
@@ -162,7 +282,6 @@
                     const v = Q_m3s / (Math.PI * Math.pow(D_guess, 2) / 4);
                     const f_loss = calculateFriction(D_guess * 1000, v);
                     if (f_loss === 0) break;
-                    // Adjust D using ratio (approx D^5 relation)
                     const factor = Math.pow(f_loss / P_loss, 0.2);
                     D_guess = D_guess * factor; 
                     if (Math.abs(factor - 1) < 1e-4) break;
@@ -173,39 +292,22 @@
             const handleFlowChange = (val, type) => {
                 let newLS = '', newCMH = '';
                 if (type === 'ls') {
-                    newLS = val;
-                    if (val && !isNaN(val)) newCMH = Math.round(val * 3.6);
+                    newLS = val; if (val && !isNaN(val)) newCMH = Math.round(val * 3.6);
                 } else {
-                    newCMH = val;
-                    if (val && !isNaN(val)) newLS = Math.round(val / 3.6);
+                    newCMH = val; if (val && !isNaN(val)) newLS = Math.round(val / 3.6);
                 }
                 setFlowLS(newLS); setFlowCMH(newCMH);
             };
 
-            const handleOldSizeChange = (w, h) => {
-                if(w !== null) setOldW(w);
-                if(h !== null) setOldH(h);
-            }
-
-            // --- MAIN CALCULATION ---
             useEffect(() => {
                 let q_cmh = 0;
-                if (mode === 'flow') {
-                    q_cmh = parseFloat(flowCMH);
-                } else {
-                    if (oldW && oldH && velocityInput) {
-                        q_cmh = (parseFloat(oldW)/1000) * (parseFloat(oldH)/1000) * parseFloat(velocityInput) * 3600;
-                    }
-                }
+                if (mode === 'flow') q_cmh = parseFloat(flowCMH);
+                else if (oldW && oldH && velocityInput) q_cmh = (parseFloat(oldW)/1000) * (parseFloat(oldH)/1000) * parseFloat(velocityInput) * 3600;
 
-                if (!q_cmh || q_cmh <= 0) {
-                    setResFlow(0); setResRound(null); setSuggestedSizes([]);
-                    return;
-                }
+                if (!q_cmh || q_cmh <= 0) { setResFlow(0); setResRound(null); setSuggestedSizes([]); return; }
                 setResFlow(q_cmh);
                 const Q_m3s = q_cmh / 3600;
 
-                // 1. Determine Standard D based on Method
                 let D_std = 0;
                 if (calcMethod === 'velocity') {
                     const v_std = parseFloat(velocityInput) || 6;
@@ -215,122 +317,66 @@
                     const p_std = parseFloat(frictionInput) || 1;
                     D_std = calculateD_from_Friction(Q_m3s, p_std);
                 }
-                
                 setResRound(Math.round(D_std));
 
-                // 2. Generate Rectangular Suggestions
                 const standardSides = [100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1600, 1800, 2000];
                 const suggestions = [];
-
                 standardSides.forEach(h => {
-                    // Logic: Find Minimum W that satisfies criteria
                     let w_guess = Math.round(((Math.PI * (D_std/1000)**2 / 4) * 1000000 / h) / 50) * 50;
                     if (w_guess < 50) w_guess = 50;
-
                     let validW = w_guess;
-                    // Optimization loop
                     for (let w = w_guess - 100; w <= w_guess + 200; w+=50) {
                         if (w < 50) continue;
                         const areaM2 = (w * h) / 1000000;
                         const v_real = Q_m3s / areaM2;
                         const deq = calculateDeq(w, h);
                         const p_real = calculateFriction(deq, v_real);
-
-                        let isValid = false;
-                        if (calcMethod === 'velocity') {
-                            isValid = v_real <= (parseFloat(velocityInput) + 0.05); 
-                        } else {
-                            isValid = p_real <= (parseFloat(frictionInput) + 0.05);
-                        }
-
-                        if (isValid) {
-                            validW = w;
-                            break; 
-                        } else {
-                            validW = w + 50;
-                        }
+                        let isValid = calcMethod === 'velocity' ? v_real <= (parseFloat(velocityInput) + 0.05) : p_real <= (parseFloat(frictionInput) + 0.05);
+                        if (isValid) { validW = w; break; } else { validW = w + 50; }
                     }
-
-                    // Final Calc for ValidW
                     const areaM2 = (validW * h) / 1000000;
                     const v_real = Q_m3s / areaM2;
                     const deq = calculateDeq(validW, h);
                     const p_real = calculateFriction(deq, v_real);
                     const ratio = validW / h;
-
                     if (ratio >= 0.25 && ratio <= 4) {
-                        suggestions.push({
-                            width: validW, height: h,
-                            actualVelocity: v_real.toFixed(2),
-                            frictionLoss: p_real.toFixed(2),
-                            area: validW * h
-                        });
+                        suggestions.push({ width: validW, height: h, actualVelocity: v_real.toFixed(2), frictionLoss: p_real.toFixed(2) });
                     }
                 });
                 suggestions.sort((a, b) => a.width - b.width);
                 setSuggestedSizes(suggestions);
-
             }, [flowCMH, oldW, oldH, calcMethod, velocityInput, frictionInput, mode, roughness]);
 
-            // Fix Height Logic - Auto Calc W (Priority 1)
             useEffect(() => {
-                const h = parseFloat(fixedH);
-                const flow = parseFloat(resFlow);
-                
+                const h = parseFloat(fixedH); const flow = parseFloat(resFlow);
                 if (h > 0 && flow > 0) {
                     const Q_m3s = flow / 3600;
                     let w = 50;
-                    let found = false;
                     const limitVal = calcMethod === 'velocity' ? parseFloat(velocityInput) : parseFloat(frictionInput);
-                    
                     if (calcMethod === 'velocity') {
                         const areaReq = Q_m3s / limitVal;
                         w = Math.ceil((areaReq * 1000000 / h) / 50) * 50;
-                    } else {
-                        w = 50; 
                     }
                     if (w < 50) w = 50;
-
                     for (let i = 0; i < 50; i++) { 
-                        const areaM2 = (w * h) / 1000000;
-                        const v_real = Q_m3s / areaM2;
-                        
+                        const areaM2 = (w * h) / 1000000; const v_real = Q_m3s / areaM2;
                         let isOk = false;
-                        if (calcMethod === 'velocity') {
-                            isOk = v_real <= limitVal + 0.05;
-                        } else {
-                            const deq = calculateDeq(w, h);
-                            const p_real = calculateFriction(deq, v_real);
-                            isOk = p_real <= limitVal + 0.05;
-                        }
-
-                        if (isOk) {
-                            setFixedW(w);
-                            found = true;
-                            break;
-                        }
+                        if (calcMethod === 'velocity') isOk = v_real <= limitVal + 0.05;
+                        else { const deq = calculateDeq(w, h); const p_real = calculateFriction(deq, v_real); isOk = p_real <= limitVal + 0.05; }
+                        if (isOk) { setFixedW(w); break; }
                         w += 50;
                     }
-                    if (!found) setFixedW(w);
                 }
             }, [resFlow, fixedH, calcMethod, velocityInput, frictionInput, roughness]);
 
-            // Recalc Stats for Fix Height (Priority 2)
             useEffect(() => {
-                const h = parseFloat(fixedH);
-                const w = parseFloat(fixedW);
-                const flow = parseFloat(resFlow);
+                const h = parseFloat(fixedH); const w = parseFloat(fixedW); const flow = parseFloat(resFlow);
                 if (h > 0 && w > 0 && flow > 0) {
-                    const Q_m3s = flow / 3600;
-                    const areaM2 = (w * h) / 1000000;
-                    const v_actual = Q_m3s / areaM2;
+                    const Q_m3s = flow / 3600; const areaM2 = (w * h) / 1000000; const v_actual = Q_m3s / areaM2;
                     setCustomVelocity(v_actual.toFixed(2));
-                    const deq = calculateDeq(w, h);
-                    const loss = calculateFriction(deq, v_actual);
+                    const deq = calculateDeq(w, h); const loss = calculateFriction(deq, v_actual);
                     setCustomFriction(loss.toFixed(2));
-                } else {
-                    setCustomVelocity(null); setCustomFriction(null);
-                }
+                } else { setCustomVelocity(null); setCustomFriction(null); }
             }, [fixedW, fixedH, resFlow, roughness]);
 
             const addToSavedList = (size) => {
@@ -339,12 +385,13 @@
 
             return (
                 <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
-                    {/* Header Duct */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-blue-900 shadow-sm flex items-center gap-4">
-                        <div className="bg-white p-3 rounded-lg text-blue-600 shadow-sm border border-blue-100"><IconDuct className="w-8 h-8"/></div>
+                    <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-slate-200/60 shadow-sm flex items-center gap-4">
+                        <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2.5 rounded-lg shadow-md shadow-blue-200 text-white">
+                            <IconDuct className="w-6 h-6"/>
+                        </div>
                         <div>
-                            <h2 className="text-2xl font-bold uppercase">Tính Toán Ống Gió</h2>
-                            <p className="text-blue-600/80 text-sm font-medium">Quy đổi kích thước theo tiêu chuẩn thiết kế (McQuay matched)</p>
+                            <h2 className="text-xl font-bold text-slate-900 leading-tight">Duct Calculator</h2>
+                            <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">Tính toán ống gió</p>
                         </div>
                     </div>
 
@@ -352,69 +399,54 @@
                         {/* LEFT INPUTS */}
                         <div className="lg:col-span-4 space-y-4">
                             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                                <h3 className="font-bold text-slate-700 mb-4 border-b pb-2 flex justify-between items-center">
-                                    Thông số đầu vào
-                                    <button onClick={() => setShowSettings(!showSettings)} className="text-slate-400 hover:text-blue-600 transition-colors" title="Cài đặt nâng cao">
-                                        <IconSettings className="w-4 h-4"/>
-                                    </button>
-                                </h3>
-                                <div className="space-y-4">
-                                    <div className="bg-slate-100 p-1 rounded-lg flex text-sm font-semibold mb-3">
-                                        <button onClick={() => setMode('flow')} className={`flex-1 py-2 rounded-md transition-all ${mode === 'flow' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Nhập Lưu Lượng</button>
-                                        <button onClick={() => setMode('size')} className={`flex-1 py-2 rounded-md transition-all ${mode === 'size' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Từ Ống Cũ</button>
+                                <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
+                                    <div className="flex items-center gap-2 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
+                                        <IconSettings className="w-3 h-3" />
+                                        <span>Input Parameters / Thông số</span>
+                                    </div>
+                                    <button onClick={() => setShowSettings(!showSettings)} className="text-slate-400 hover:text-blue-600"><IconSettings className="w-3 h-3"/></button>
+                                </div>
+                                
+                                <div className="space-y-6">
+                                    <div className="bg-slate-50 p-1 rounded-lg flex text-[10px] font-bold">
+                                        <button onClick={() => setMode('flow')} className={`flex-1 py-1.5 rounded-md transition-all ${mode === 'flow' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Flow Mode / Lưu Lượng</button>
+                                        <button onClick={() => setMode('size')} className={`flex-1 py-1.5 rounded-md transition-all ${mode === 'size' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Size Mode / Kích thước cũ</button>
                                     </div>
 
                                     {mode === 'flow' ? (
-                                        <div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <FloatingInput id="d_ls" label="L/s" value={flowLS} onChange={(v) => handleFlowChange(v, 'ls')} />
-                                                <FloatingInput id="d_cmh" label="m³/h" value={flowCMH} onChange={(v) => handleFlowChange(v, 'cmh')} />
-                                            </div>
-                                            <FormulaText>1 l/s = 3.6 m³/h</FormulaText>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <MinimalInput label="Flow (L/s)" subLabel="Lưu lượng" value={flowLS} onChange={(v) => handleFlowChange(v, 'ls')} />
+                                            <MinimalInput label="Flow (m³/h)" subLabel="Lưu lượng" value={flowCMH} onChange={(v) => handleFlowChange(v, 'cmh')} />
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-2 gap-4">
-                                            <FloatingInput id="d_oldW" label="W (mm)" value={oldW} onChange={(v) => handleOldSizeChange(v, null)} />
-                                            <FloatingInput id="d_oldH" label="H (mm)" value={oldH} onChange={(v) => handleOldSizeChange(null, v)} />
+                                            <MinimalInput label="Width (mm)" subLabel="Rộng" value={oldW} onChange={setOldW} />
+                                            <MinimalInput label="Height (mm)" subLabel="Cao" value={oldH} onChange={setOldH} />
                                         </div>
                                     )}
 
-                                    {/* Advanced Settings (Roughness) */}
                                     {showSettings && (
-                                        <div className="bg-orange-50 border border-orange-100 p-3 rounded-lg animate-fade-in">
-                                            <FloatingInput 
-                                                id="d_rough" label="Độ nhám (mm)" 
-                                                value={roughness} onChange={setRoughness} step="0.01" 
-                                                formula="0.09: New | 0.15: Avg"
-                                            />
+                                        <div className="bg-orange-50 p-3 rounded-lg animate-fade-in">
+                                            <MinimalInput label="Roughness (mm)" subLabel="Độ nhám" value={roughness} onChange={setRoughness} step="0.01" />
                                         </div>
                                     )}
 
-                                    {/* Design Criteria Selection */}
-                                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 mt-2 space-y-2">
-                                        <div className="text-xs font-bold text-slate-500 uppercase mb-2">Phương pháp tính (Giới hạn)</div>
-                                        
+                                    <div className="space-y-3 pt-2">
                                         <div className="flex flex-col gap-2">
-                                            <label className={`flex items-center gap-3 p-2 rounded border cursor-pointer transition-all ${calcMethod === 'velocity' ? 'bg-white border-blue-500 shadow-sm' : 'border-transparent hover:bg-white'}`}>
+                                            <label className={`flex items-center gap-2 cursor-pointer group`}>
                                                 <input type="radio" name="calcMethod" checked={calcMethod === 'velocity'} onChange={() => setCalcMethod('velocity')} className="accent-blue-600" />
-                                                <span className="text-sm font-medium flex-1">Theo Vận tốc (Max)</span>
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase group-hover:text-blue-600">Max Velocity / Vận tốc</span>
                                             </label>
-                                            
                                             {calcMethod === 'velocity' && (
-                                                <div className="pl-7 pr-2 pb-2">
-                                                    <FloatingInput id="in_vel" label="Vận tốc (m/s)" value={velocityInput} onChange={setVelocityInput} />
-                                                </div>
+                                                <div className="pl-6"><MinimalInput label="Velocity (m/s)" subLabel="Vận tốc" value={velocityInput} onChange={setVelocityInput} /></div>
                                             )}
 
-                                            <label className={`flex items-center gap-3 p-2 rounded border cursor-pointer transition-all ${calcMethod === 'friction' ? 'bg-white border-blue-500 shadow-sm' : 'border-transparent hover:bg-white'}`}>
+                                            <label className={`flex items-center gap-2 cursor-pointer group mt-2`}>
                                                 <input type="radio" name="calcMethod" checked={calcMethod === 'friction'} onChange={() => setCalcMethod('friction')} className="accent-blue-600" />
-                                                <span className="text-sm font-medium flex-1">Theo Tổn thất (Max)</span>
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase group-hover:text-blue-600">Max Friction / Tổn thất</span>
                                             </label>
-
                                             {calcMethod === 'friction' && (
-                                                <div className="pl-7 pr-2 pb-2">
-                                                    <FloatingInput id="in_fric" label="Tổn thất (Pa/m)" value={frictionInput} onChange={setFrictionInput} />
-                                                </div>
+                                                <div className="pl-6"><MinimalInput label="Friction (Pa/m)" subLabel="Tổn thất" value={frictionInput} onChange={setFrictionInput} /></div>
                                             )}
                                         </div>
                                     </div>
@@ -422,77 +454,62 @@
                             </div>
 
                             {/* Kết quả nhanh */}
-                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-3">
-                                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                                    <span className="text-sm font-medium text-slate-500">Lưu lượng:</span>
-                                    <span className="text-lg font-bold text-slate-800">{Math.round(resFlow).toLocaleString()} <span className="text-xs font-normal">m³/h</span></span>
-                                </div>
-                                <div className="flex justify-between items-center pt-1">
-                                    <button onClick={() => setShowRound(!showRound)} className="flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-colors text-xs font-bold uppercase">
-                                        <IconCircle className="w-4 h-4" /> {showRound ? "Ẩn ống tròn" : "Xem ống tròn"}
-                                    </button>
-                                    {showRound && <span className="text-lg font-bold text-slate-700">{resRound ? `D${resRound}` : '---'}</span>}
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 rounded-l-xl"></div>
+                                <div className="relative z-10 flex justify-between items-center">
+                                    <div>
+                                        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Total Flow / <span className="font-normal italic">Lưu lượng</span></p>
+                                        <span className="text-2xl font-bold text-slate-800">{Math.round(resFlow).toLocaleString()} <span className="text-xs font-normal">m³/h</span></span>
+                                    </div>
+                                    <div className="text-right">
+                                        <button onClick={() => setShowRound(!showRound)} className="text-[10px] font-bold text-blue-500 uppercase mb-1 hover:underline">
+                                            {showRound ? "Hide Round" : "Show Round Pipe"}
+                                        </button>
+                                        {showRound && <div className="text-xl font-bold text-slate-600">D{resRound ? resRound : '---'}</div>}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Fix Chiều Cao */}
-                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 border-l-4 border-l-blue-400">
-                                <h3 className="font-bold text-slate-700 mb-4">Fix Chiều Cao (H)</h3>
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                                <div className="flex items-center gap-2 mb-4 text-slate-400 uppercase text-[10px] font-bold tracking-wider border-b border-slate-100 pb-2">
+                                    <span>Fix Dimension / Cố định kích thước</span>
+                                </div>
                                 <div className="space-y-4">
-                                    <FloatingInput id="d_h" label="Chiều cao (mm)" value={fixedH} onChange={setFixedH} />
-                                    <FloatingInput id="d_w" label="Chiều rộng (mm)" value={fixedW} onChange={setFixedW} />
+                                    <MinimalInput label="Fixed Height (mm)" subLabel="Cao" value={fixedH} onChange={setFixedH} />
+                                    <MinimalInput label="Calc Width (mm)" subLabel="Rộng" value={fixedW} onChange={setFixedW} />
                                     
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div className="flex flex-col bg-slate-50 p-2 rounded border border-slate-100">
-                                            <span className="text-[10px] font-semibold text-slate-500 uppercase">Vận tốc</span>
-                                            <span className={`text-sm ${getCheckColor(customVelocity, velocityInput, false)}`}>
-                                                {customVelocity ? `${customVelocity} m/s` : '---'}
-                                            </span>
+                                    <div className="grid grid-cols-2 gap-2 mt-2">
+                                        <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase block">Actual Vel.</span>
+                                            <span className={`text-sm ${getCheckColor(customVelocity, velocityInput, false)}`}>{customVelocity ? `${customVelocity} m/s` : '---'}</span>
                                         </div>
-                                        <div className="flex flex-col bg-slate-50 p-2 rounded border border-slate-100">
-                                            <span className="text-[10px] font-semibold text-slate-500 uppercase">Tổn thất</span>
-                                            <span className={`text-sm ${getCheckColor(customFriction, frictionInput, true)}`}>
-                                                {customFriction ? `${customFriction} Pa/m` : '---'}
-                                            </span>
+                                        <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase block">Friction</span>
+                                            <span className={`text-sm ${getCheckColor(customFriction, frictionInput, true)}`}>{customFriction ? `${customFriction} Pa/m` : '---'}</span>
                                         </div>
                                     </div>
-
-                                    <button 
-                                        disabled={!fixedH || !fixedW}
-                                        onClick={() => addToSavedList({width: fixedW, height: fixedH, actualVelocity: customVelocity || '---', qty: 1})}
-                                        className="w-full py-2 bg-blue-50 text-blue-600 font-bold rounded hover:bg-blue-100 disabled:opacity-50"
-                                    >
-                                        Thêm vào List
-                                    </button>
+                                    <button disabled={!fixedH || !fixedW} onClick={() => addToSavedList({width: fixedW, height: fixedH, actualVelocity: customVelocity || '---'})} className="w-full py-2 bg-blue-50 text-blue-600 text-xs font-bold uppercase rounded hover:bg-blue-100 disabled:opacity-50">Add to List / Thêm</button>
                                 </div>
-                                <FormulaText>W = Q / (v * H)</FormulaText>
                             </div>
                         </div>
 
                         {/* RIGHT RESULTS */}
                         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Suggested Table */}
-                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[600px]">
-                                <div className="p-3 bg-slate-50 border-b font-bold text-slate-700 text-sm uppercase">Kích thước đề xuất</div>
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[550px]">
+                                <div className="p-3 bg-slate-50 border-b font-bold text-slate-700 text-[10px] uppercase tracking-wide">Suggested Sizes / Kích thước đề xuất</div>
                                 <div className="overflow-auto flex-1">
                                     <table className="w-full text-sm text-left">
                                         <thead className="bg-slate-50 text-slate-500 sticky top-0">
-                                            <tr>
-                                                <th className="p-3">WxH</th>
-                                                <th className="p-3">V.Tốc</th>
-                                                <th className="p-3">P.Loss</th>
-                                                <th className="p-3"></th>
-                                            </tr>
+                                            <tr><th className="p-3 text-[10px] uppercase">WxH</th><th className="p-3 text-[10px] uppercase">Vel.</th><th className="p-3 text-[10px] uppercase">Loss</th><th className="p-3"></th></tr>
                                         </thead>
                                         <tbody className="divide-y">
                                             {suggestedSizes.map((s, i) => (
                                                 <tr key={i} className="hover:bg-blue-50">
-                                                    <td className="p-3 font-bold">{s.width} x {s.height}</td>
+                                                    <td className="p-3 font-bold text-slate-700">{s.width} x {s.height}</td>
                                                     <td className={`p-3 text-xs ${getCheckColor(s.actualVelocity, velocityInput, false)}`}>{s.actualVelocity}</td>
                                                     <td className={`p-3 text-xs ${getCheckColor(s.frictionLoss, frictionInput, true)}`}>{s.frictionLoss}</td>
-                                                    <td className="p-3 text-right">
-                                                        <button onClick={() => addToSavedList(s)} className="text-xs bg-white border border-slate-200 px-2 py-1 rounded hover:border-blue-500 hover:text-blue-600">Chọn</button>
-                                                    </td>
+                                                    <td className="p-3 text-right"><button onClick={() => addToSavedList(s)} className="text-[10px] bg-white border border-slate-200 px-2 py-1 rounded hover:border-blue-500 hover:text-blue-600 font-bold">CHỌN</button></td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -500,33 +517,30 @@
                                 </div>
                             </div>
 
-                            {/* Saved List */}
-                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[600px]">
-                                <div className="p-3 bg-blue-50 border-b font-bold text-blue-800 text-sm uppercase flex justify-between">
-                                    <span>Danh sách chọn</span>
-                                    <span className="bg-white px-2 rounded-full text-xs flex items-center">{savedList.length}</span>
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[550px]">
+                                <div className="p-3 bg-blue-50 border-b font-bold text-blue-800 text-[10px] uppercase tracking-wide flex justify-between">
+                                    <span>Selected List / Danh sách chọn</span>
+                                    <span className="bg-white px-2 rounded-full text-[10px] flex items-center">{savedList.length}</span>
                                 </div>
                                 <div className="overflow-auto flex-1">
                                     <table className="w-full text-sm text-left">
                                         <thead className="bg-slate-50 text-slate-500 sticky top-0">
-                                            <tr><th className="p-3">Size</th><th className="p-3 text-center">SL</th><th className="p-3"></th></tr>
+                                            <tr><th className="p-3 text-[10px] uppercase">Size</th><th className="p-3 text-center text-[10px] uppercase">Qty</th><th className="p-3"></th></tr>
                                         </thead>
                                         <tbody className="divide-y">
                                             {savedList.map((item) => (
                                                 <tr key={item.id}>
-                                                    <td className="p-3 font-medium">
+                                                    <td className="p-3 font-medium text-slate-700">
                                                         {item.width} x {item.height}
                                                         <div className="text-[10px] text-slate-400">v = {item.actualVelocity} m/s</div>
                                                     </td>
-                                                    <td className="p-3 text-center"><input type="number" defaultValue={item.qty} className="w-10 text-center border rounded bg-slate-50"/></td>
-                                                    <td className="p-3 text-right">
-                                                        <button onClick={() => setSavedList(savedList.filter(i => i.id !== item.id))} className="text-red-400 hover:text-red-600"><IconTrash className="w-4 h-4" /></button>
-                                                    </td>
+                                                    <td className="p-3 text-center"><input type="number" defaultValue={item.qty} className="w-8 text-center border-b border-slate-200 bg-transparent text-xs font-bold outline-none"/></td>
+                                                    <td className="p-3 text-right"><button onClick={() => setSavedList(savedList.filter(i => i.id !== item.id))} className="text-slate-400 hover:text-red-500"><IconTrash className="w-3 h-3" /></button></td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
-                                    {savedList.length === 0 && <div className="p-10 text-center text-slate-300 italic">Trống</div>}
+                                    {savedList.length === 0 && <div className="p-10 text-center text-slate-300 italic text-xs">Empty List</div>}
                                 </div>
                             </div>
                         </div>
@@ -535,7 +549,9 @@
             );
         };
 
-        // --- COMPONENT 2: GRILLE CALCULATOR (Giữ nguyên) ---
+        // ==========================================
+        // 3. GRILLE CALCULATOR (Cập nhật giao diện Minimal)
+        // ==========================================
         const GrilleCalculator = () => {
             const [flowLS, setFlowLS] = useState(100);
             const [flowCMH, setFlowCMH] = useState(360);
@@ -549,158 +565,111 @@
             const [savedList, setSavedList] = useState([]);
 
             const handleLSChange = (val) => {
-                setFlowLS(val);
-                if (val && !isNaN(val)) setFlowCMH(Math.round(val * 3.6 * 100) / 100); else setFlowCMH('');
+                setFlowLS(val); if (val && !isNaN(val)) setFlowCMH(Math.round(val * 3.6 * 100) / 100); else setFlowCMH('');
             };
             const handleCMHChange = (val) => {
-                setFlowCMH(val);
-                if (val && !isNaN(val)) setFlowLS(Math.round(val / 3.6 * 100) / 100); else setFlowLS('');
+                setFlowCMH(val); if (val && !isNaN(val)) setFlowLS(Math.round(val / 3.6 * 100) / 100); else setFlowLS('');
             };
 
             useEffect(() => {
-                const ls = parseFloat(flowLS);
-                const vel = parseFloat(velocity);
-                const surf = parseFloat(surface);
-                if (isNaN(ls) || isNaN(vel) || isNaN(surf) || ls <= 0 || vel <= 0 || surf <= 0) {
-                    setRequiredArea(0); setSuggestedSizes([]); return;
-                }
-                const Q_m3s = ls / 1000;
-                const A_eff_req_m2 = Q_m3s / vel; 
-                const A_gross_req_m2 = A_eff_req_m2 / (surf / 100);
-                const A_gross_req_mm2 = A_gross_req_m2 * 1000000;
+                const ls = parseFloat(flowLS); const vel = parseFloat(velocity); const surf = parseFloat(surface);
+                if (isNaN(ls) || isNaN(vel) || isNaN(surf) || ls <= 0 || vel <= 0 || surf <= 0) { setRequiredArea(0); setSuggestedSizes([]); return; }
+                const Q_m3s = ls / 1000; const A_eff_req_m2 = Q_m3s / vel; 
+                const A_gross_req_m2 = A_eff_req_m2 / (surf / 100); const A_gross_req_mm2 = A_gross_req_m2 * 1000000;
                 setRequiredArea(Math.round(A_gross_req_mm2));
 
                 const standardWidths = [150, 200, 250, 300, 350, 400, 450, 500, 600, 800, 1000];
                 const suggestions = [];
                 standardWidths.forEach(width => {
                     let rawHeight = A_gross_req_mm2 / width;
-                    let roundedHeight = Math.round(rawHeight / 50) * 50;
-                    if (roundedHeight < 50) roundedHeight = 50;
-                    const A_actual_gross_m2 = (width * roundedHeight) / 1000000;
-                    const A_actual_eff_m2 = A_actual_gross_m2 * (surf / 100);
-                    const actualVel = Q_m3s / A_actual_eff_m2;
-                    const ratio = width / roundedHeight;
-                    if (ratio >= 0.25 && ratio <= 6) {
-                        suggestions.push({ width, height: roundedHeight, actualVelocity: actualVel.toFixed(2), area: (width * roundedHeight) });
-                    }
+                    let roundedHeight = Math.round(rawHeight / 50) * 50; if (roundedHeight < 50) roundedHeight = 50;
+                    const A_actual_gross_m2 = (width * roundedHeight) / 1000000; const A_actual_eff_m2 = A_actual_gross_m2 * (surf / 100);
+                    const actualVel = Q_m3s / A_actual_eff_m2; const ratio = width / roundedHeight;
+                    if (ratio >= 0.25 && ratio <= 6) suggestions.push({ width, height: roundedHeight, actualVelocity: actualVel.toFixed(2) });
                 });
                 setSuggestedSizes(suggestions);
             }, [flowLS, flowCMH, velocity, surface]);
 
             useEffect(() => {
-                if (requiredArea > 0 && parseFloat(customHeight) > 0) {
-                    const h = parseFloat(customHeight);
-                    const rawW = requiredArea / h;
-                    let roundedW = Math.round(rawW / 50) * 50;
-                    if (roundedW < 50) roundedW = 50;
-                    setCustomWidth(roundedW);
-                }
-            }, [requiredArea, customHeight]);
-
-            useEffect(() => {
-                const h = parseFloat(customHeight);
-                const w = parseFloat(customWidth);
-                const ls = parseFloat(flowLS);
-                const surf = parseFloat(surface);
+                const h = parseFloat(customHeight); const w = parseFloat(customWidth); const ls = parseFloat(flowLS); const surf = parseFloat(surface);
                 if (h > 0 && w > 0 && ls > 0 && surf > 0) {
-                    const Q_m3s = ls / 1000;
-                    const A_gross_m2 = (w * h) / 1000000;
-                    const A_eff_m2 = A_gross_m2 * (surf / 100);
-                    const v_actual = Q_m3s / A_eff_m2;
-                    setCustomVelocity(v_actual.toFixed(2));
-                } else {
-                    setCustomVelocity(null);
-                }
+                    const Q_m3s = ls / 1000; const A_gross_m2 = (w * h) / 1000000; const A_eff_m2 = A_gross_m2 * (surf / 100);
+                    const v_actual = Q_m3s / A_eff_m2; setCustomVelocity(v_actual.toFixed(2));
+                } else setCustomVelocity(null);
             }, [customHeight, customWidth, flowLS, surface]);
 
             const addToSavedList = (size) => {
-                const newItem = { id: Date.now(), width: size.width, height: size.height, actualVel: size.actualVelocity, qty: 1 };
-                setSavedList([...savedList, newItem]);
+                setSavedList([...savedList, { id: Date.now(), width: size.width, height: size.height, actualVel: size.actualVelocity, qty: 1 }]);
             };
 
             return (
                 <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
-                    {/* Header Grille */}
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 text-emerald-900 shadow-sm flex items-center gap-4">
-                        <div className="bg-white p-3 rounded-lg text-emerald-600 shadow-sm border border-emerald-100"><IconGrille className="w-8 h-8"/></div>
+                    <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-slate-200/60 shadow-sm flex items-center gap-4">
+                        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-2.5 rounded-lg shadow-md shadow-emerald-200 text-white">
+                            <IconGrille className="w-6 h-6"/>
+                        </div>
                         <div>
-                            <h2 className="text-2xl font-bold uppercase">Tính Toán Miệng Gió</h2>
-                            <p className="text-emerald-600/80 text-sm font-medium">Chọn kích thước miệng gió theo diện tích thoáng</p>
+                            <h2 className="text-xl font-bold text-slate-900 leading-tight">Grille Calculator</h2>
+                            <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">Tính toán miệng gió</p>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                         <div className="lg:col-span-4 space-y-4">
                             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                                <h3 className="font-bold text-slate-700 mb-4 border-b pb-2">Thông số đầu vào</h3>
-                                <div className="space-y-4">
+                                <div className="flex items-center gap-2 mb-4 text-slate-400 uppercase text-[10px] font-bold tracking-wider border-b border-slate-100 pb-2">
+                                    <IconSettings className="w-3 h-3" />
+                                    <span>Input Parameters / Thông số</span>
+                                </div>
+                                <div className="space-y-6">
                                     <div className="grid grid-cols-2 gap-4">
-                                        <FloatingInput id="g_ls" label="L/s" value={flowLS} onChange={handleLSChange} />
-                                        <FloatingInput id="g_cmh" label="m³/h" value={flowCMH} onChange={handleCMHChange} />
+                                        <MinimalInput label="Flow (L/s)" subLabel="Lưu lượng" value={flowLS} onChange={handleLSChange} />
+                                        <MinimalInput label="Flow (m³/h)" subLabel="Lưu lượng" value={flowCMH} onChange={handleCMHChange} />
                                     </div>
-                                    <div className="relative">
-                                        <FloatingInput id="g_vel" label="Vận tốc (m/s)" value={velocity} onChange={setVelocity} step="0.1" />
-                                        <FormulaText>v_limit (max)</FormulaText>
-                                    </div>
-                                    <div className="relative">
-                                        <FloatingInput id="g_surf" label="Diện tích thoáng (%)" value={surface} onChange={setSurface} />
-                                        <FormulaText>A_eff = A_gross * %</FormulaText>
-                                    </div>
+                                    <MinimalInput label="Velocity (m/s)" subLabel="Vận tốc Max" value={velocity} onChange={setVelocity} step="0.1" />
+                                    <MinimalInput label="Free Area (%)" subLabel="Diện tích thoáng" value={surface} onChange={setSurface} />
                                 </div>
                             </div>
                             
-                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                                <h3 className="font-bold text-slate-700 mb-4 border-b pb-2">Diện tích Yêu cầu</h3>
-                                <div className="text-3xl font-bold text-emerald-600 text-center py-2">
-                                    {requiredArea.toLocaleString()} <span className="text-sm text-slate-400 font-normal">mm²</span>
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 rounded-l-xl"></div>
+                                <div className="relative z-10">
+                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Required Neck Area / <span className="font-normal italic">Diện tích cổ</span></p>
+                                    <span className="text-3xl font-bold text-emerald-600">{requiredArea.toLocaleString()} <span className="text-xs font-normal text-slate-400">mm²</span></span>
                                 </div>
-                                <FormulaText>A_neck = Q / (v * %Surface)</FormulaText>
                             </div>
 
-                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 border-l-4 border-l-orange-400">
-                                <h3 className="font-bold text-slate-700 mb-4">Fix Chiều Cao</h3>
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                                <div className="flex items-center gap-2 mb-4 text-slate-400 uppercase text-[10px] font-bold tracking-wider border-b border-slate-100 pb-2">
+                                    <span>Fix Dimension / Cố định kích thước</span>
+                                </div>
                                 <div className="space-y-4">
-                                    <FloatingInput id="c_h" label="Chiều cao (mm)" value={customHeight} onChange={setCustomHeight} />
-                                    <FloatingInput id="c_w" label="Chiều rộng (mm)" value={customWidth} onChange={(val) => setCustomWidth(val)} />
+                                    <MinimalInput label="Height (mm)" subLabel="Cao" value={customHeight} onChange={setCustomHeight} />
+                                    <MinimalInput label="Width (mm)" subLabel="Rộng" value={customWidth} onChange={setCustomWidth} />
                                     
-                                    <div className="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
-                                        <span className="text-xs font-semibold text-slate-500 uppercase">Vận tốc thực:</span>
-                                        <span className={`text-sm font-bold px-2 py-0.5 rounded border ${getCheckColor(customVelocity, velocity)}`}>
-                                            {customVelocity ? `${customVelocity} m/s` : '---'}
-                                        </span>
+                                    <div className="bg-slate-50 p-2 rounded border border-slate-100 flex justify-between items-center">
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Actual Vel.</span>
+                                        <span className={`text-sm font-bold ${getCheckColor(customVelocity, velocity)}`}>{customVelocity ? `${customVelocity} m/s` : '---'}</span>
                                     </div>
-
-                                    <button 
-                                        disabled={!customHeight || !customWidth}
-                                        onClick={() => addToSavedList({width: customWidth, height: customHeight, actualVelocity: customVelocity || '---'})}
-                                        className="w-full py-2 bg-orange-50 text-orange-600 font-bold rounded hover:bg-orange-100 disabled:opacity-50"
-                                    >
-                                        Thêm vào List
-                                    </button>
+                                    <button disabled={!customHeight || !customWidth} onClick={() => addToSavedList({width: customWidth, height: customHeight, actualVelocity: customVelocity || '---'})} className="w-full py-2 bg-emerald-50 text-emerald-600 text-xs font-bold uppercase rounded hover:bg-emerald-100 disabled:opacity-50">Add to List / Thêm</button>
                                 </div>
                             </div>
                         </div>
 
                         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[500px]">
-                                <div className="p-3 bg-slate-50 border-b font-bold text-slate-700 text-sm uppercase">Kích thước đề xuất (Auto)</div>
+                                <div className="p-3 bg-slate-50 border-b font-bold text-slate-700 text-[10px] uppercase tracking-wide">Suggested Sizes / Kích thước đề xuất</div>
                                 <div className="overflow-auto flex-1">
                                     <table className="w-full text-sm text-left">
                                         <thead className="bg-slate-50 text-slate-500 sticky top-0">
-                                            <tr><th className="p-3">WxH</th><th className="p-3">V.Tốc</th><th className="p-3"></th></tr>
+                                            <tr><th className="p-3 text-[10px] uppercase">WxH</th><th className="p-3 text-[10px] uppercase">Vel.</th><th className="p-3"></th></tr>
                                         </thead>
                                         <tbody className="divide-y">
                                             {suggestedSizes.map((s, i) => (
-                                                <tr key={i} className="hover:bg-blue-50">
-                                                    <td className="p-3 font-bold">{s.width} x {s.height}</td>
-                                                    <td className="p-3">
-                                                        <span className={`px-2 py-1 rounded text-xs font-bold border ${getCheckColor(s.actualVelocity, velocity)}`}>
-                                                            {s.actualVelocity} m/s
-                                                        </span>
-                                                    </td>
-                                                    <td className="p-3 text-right">
-                                                        <button onClick={() => addToSavedList(s)} className="text-xs bg-white border border-slate-200 px-2 py-1 rounded hover:border-blue-500 hover:text-blue-600">Chọn</button>
-                                                    </td>
+                                                <tr key={i} className="hover:bg-emerald-50">
+                                                    <td className="p-3 font-bold text-slate-700">{s.width} x {s.height}</td>
+                                                    <td className={`p-3 text-xs ${getCheckColor(s.actualVelocity, velocity, false)}`}>{s.actualVelocity} m/s</td>
+                                                    <td className="p-3 text-right"><button onClick={() => addToSavedList(s)} className="text-[10px] bg-white border border-slate-200 px-2 py-1 rounded hover:border-emerald-500 hover:text-emerald-600 font-bold">CHỌN</button></td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -709,31 +678,29 @@
                             </div>
 
                             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[500px]">
-                                <div className="p-3 bg-emerald-50 border-b font-bold text-emerald-800 text-sm uppercase flex justify-between">
-                                    <span>Danh sách chọn</span>
-                                    <span className="bg-white px-2 rounded-full text-xs flex items-center">{savedList.length}</span>
+                                <div className="p-3 bg-emerald-50 border-b font-bold text-emerald-800 text-[10px] uppercase tracking-wide flex justify-between">
+                                    <span>Selected List / Danh sách chọn</span>
+                                    <span className="bg-white px-2 rounded-full text-[10px] flex items-center">{savedList.length}</span>
                                 </div>
                                 <div className="overflow-auto flex-1">
                                     <table className="w-full text-sm text-left">
                                         <thead className="bg-slate-50 text-slate-500 sticky top-0">
-                                            <tr><th className="p-3">Size</th><th className="p-3 text-center">SL</th><th className="p-3"></th></tr>
+                                            <tr><th className="p-3 text-[10px] uppercase">Size</th><th className="p-3 text-center text-[10px] uppercase">Qty</th><th className="p-3"></th></tr>
                                         </thead>
                                         <tbody className="divide-y">
                                             {savedList.map((item) => (
                                                 <tr key={item.id}>
-                                                    <td className="p-3 font-medium">
+                                                    <td className="p-3 font-medium text-slate-700">
                                                         {item.width} x {item.height}
                                                         <div className="text-[10px] text-slate-400">v = {item.actualVel} m/s</div>
                                                     </td>
-                                                    <td className="p-3 text-center"><input type="number" defaultValue={item.qty} className="w-10 text-center border rounded bg-slate-50"/></td>
-                                                    <td className="p-3 text-right">
-                                                        <button onClick={() => setSavedList(savedList.filter(i => i.id !== item.id))} className="text-red-400 hover:text-red-600"><IconTrash className="w-4 h-4" /></button>
-                                                    </td>
+                                                    <td className="p-3 text-center"><input type="number" defaultValue={item.qty} className="w-8 text-center border-b border-slate-200 bg-transparent text-xs font-bold outline-none"/></td>
+                                                    <td className="p-3 text-right"><button onClick={() => setSavedList(savedList.filter(i => i.id !== item.id))} className="text-slate-400 hover:text-red-500"><IconTrash className="w-3 h-3" /></button></td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
-                                    {savedList.length === 0 && <div className="p-10 text-center text-slate-300 italic">Trống</div>}
+                                    {savedList.length === 0 && <div className="p-10 text-center text-slate-300 italic text-xs">Empty List</div>}
                                 </div>
                             </div>
                         </div>
@@ -742,9 +709,17 @@
             );
         };
 
-        // --- MAIN APP COMPONENT ---
+        // ==========================================
+        // 4. MAIN APP
+        // ==========================================
         const App = () => {
             const [activeTab, setActiveTab] = useState('duct');
+
+            const menuItems = [
+                { id: 'duct', label: 'Duct Calc', sub: 'Tính Ống Gió', icon: IconDuct, color: 'blue' },
+                { id: 'grille', label: 'Grille Calc', sub: 'Tính Miệng Gió', icon: IconGrille, color: 'emerald' },
+                { id: 'airflow', label: 'Airflow Calc', sub: 'Tính Lưu Lượng', icon: IconWind, color: 'blue' },
+            ];
 
             return (
                 <div className="flex min-h-screen bg-slate-100 font-sans">
@@ -756,35 +731,35 @@
                         </div>
 
                         <div className="p-4 space-y-3">
-                            <button 
-                                onClick={() => setActiveTab('duct')}
-                                className={`w-full flex items-center gap-3 p-3 rounded-xl font-semibold transition-all duration-200 ${activeTab === 'duct' ? 'bg-blue-50 border-r-4 border-blue-600 text-blue-800 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}
-                            >
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${activeTab === 'duct' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
-                                    <IconDuct className="w-5 h-5"/>
-                                </div>
-                                <span className="hidden md:block">Tính Ống Gió</span>
-                            </button>
-
-                            <button 
-                                onClick={() => setActiveTab('grille')}
-                                className={`w-full flex items-center gap-3 p-3 rounded-xl font-semibold transition-all duration-200 ${activeTab === 'grille' ? 'bg-emerald-50 border-r-4 border-emerald-600 text-emerald-700 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}
-                            >
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${activeTab === 'grille' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
-                                    <IconGrille className="w-5 h-5"/>
-                                </div>
-                                <span className="hidden md:block">Tính Miệng Gió</span>
-                            </button>
+                            {menuItems.map(item => (
+                                <button 
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className={`w-full flex items-center gap-3 p-3 rounded-xl font-semibold transition-all duration-200 ${activeTab === item.id 
+                                        ? `bg-${item.color}-50 border-r-4 border-${item.color}-600 text-${item.color}-800 shadow-sm` 
+                                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}
+                                >
+                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${activeTab === item.id ? `bg-${item.color}-100 text-${item.color}-600` : 'bg-slate-100 text-slate-400'}`}>
+                                        <item.icon className="w-5 h-5"/>
+                                    </div>
+                                    <div className="hidden md:flex flex-col items-start">
+                                        <span className="leading-none">{item.label}</span>
+                                        <span className="text-[10px] font-normal opacity-60 mt-1">{item.sub}</span>
+                                    </div>
+                                </button>
+                            ))}
                         </div>
                         
-                        <div className="mt-auto p-4 border-t border-slate-100">
-                            <div className="text-[10px] text-center text-slate-400">Ver 2.0 Unified</div>
+                        <div className="mt-auto p-4 border-t border-slate-100 text-center">
+                            <div className="text-[10px] text-slate-400">Ver 3.0 Unified</div>
                         </div>
                     </div>
 
-                    {/* CONTENT AREA */}
+                    {/* CONTENT */}
                     <div className="flex-1 ml-24 md:ml-64 p-4 md:p-8 overflow-y-auto h-screen">
-                        {activeTab === 'duct' ? <DuctCalculator /> : <GrilleCalculator />}
+                        {activeTab === 'duct' && <DuctCalculator />}
+                        {activeTab === 'grille' && <GrilleCalculator />}
+                        {activeTab === 'airflow' && <AirflowCalculator />}
                     </div>
                 </div>
             );
