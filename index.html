@@ -51,16 +51,22 @@
         const IconList = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>);
         const IconEdit3 = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>);
 
+        // --- SHARED COMPONENT: FORMULA TEXT ---
+        const FormulaText = ({ children }) => (
+            <div className="text-[10px] text-slate-400 italic mt-1 font-serif tracking-wide opacity-80 pl-0.5">{children}</div>
+        );
+
         // --- SHARED COMPONENT: MINIMAL INPUT (Style mới) ---
-        const MinimalInput = ({ label, subLabel, value, onChange, onFocus, type = "number", step, disabled }) => (
+        const MinimalInput = ({ label, subLabel, value, onChange, onFocus, type = "number", step, disabled, formula }) => (
             <div className={`w-full ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 truncate">
-                    {label} <span className="font-normal text-slate-300 normal-case italic">/ {subLabel}</span>
-                </label>
+                <div className="mb-0.5">
+                    <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-tight">{label}</span>
+                    <span className="block text-[10px] font-medium text-slate-400 italic leading-tight">{subLabel}</span>
+                </div>
                 <input
                     type={type}
                     step={step}
-                    className="block w-full py-1 border-b border-slate-200 text-lg font-bold text-slate-700 placeholder-slate-300 focus:outline-none focus:border-blue-500 focus:text-blue-600 transition-colors bg-transparent"
+                    className="block w-full py-1.5 border-b border-slate-200 text-lg font-bold text-slate-700 placeholder-slate-300 focus:outline-none focus:border-blue-500 focus:text-blue-600 transition-colors bg-transparent"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     onFocus={(e) => {
@@ -69,6 +75,7 @@
                     }}
                     disabled={disabled}
                 />
+                {formula && <FormulaText>{formula}</FormulaText>}
             </div>
         );
 
@@ -86,9 +93,9 @@
         // 1. AIRFLOW CALCULATOR (Tích hợp vào)
         // ==========================================
         const AirflowCalculator = () => {
-            const [flowLs, setFlowLs] = useState(15000);
-            const [flowM3h, setFlowM3h] = useState(54000);
-            const [totalDiffusers, setTotalDiffusers] = useState(20);
+            const [flowLs, setFlowLs] = useState(100);
+            const [flowM3h, setFlowM3h] = useState(360);
+            const [totalDiffusers, setTotalDiffusers] = useState(1);
             const [tableUnit, setTableUnit] = useState('l/s'); 
             const [tableData, setTableData] = useState([]);
 
@@ -157,10 +164,19 @@
                                 </div>
                                 <div className="space-y-6">
                                     <div className="grid grid-cols-2 gap-8">
-                                        <MinimalInput label="Flow (L/s)" subLabel="Lưu lượng" value={flowLs} onChange={handleLsChange} />
-                                        <MinimalInput label="Flow (m³/h)" subLabel="Lưu lượng" value={flowM3h} onChange={handleM3hChange} />
+                                        <div className="relative">
+                                            <MinimalInput label="Flow (L/s)" subLabel="Lưu lượng" value={flowLs} onChange={handleLsChange} />
+                                            <FormulaText>1 l/s = 3.6 m³/h</FormulaText>
+                                        </div>
+                                        <div className="relative">
+                                            <MinimalInput label="Flow (m³/h)" subLabel="Lưu lượng" value={flowM3h} onChange={handleM3hChange} />
+                                            <FormulaText>1 m³/h = 0.278 l/s</FormulaText>
+                                        </div>
                                     </div>
-                                    <MinimalInput label="No. of Diffusers" subLabel="Số miệng gió" value={totalDiffusers} onChange={(v) => setTotalDiffusers(Number(v))} />
+                                    <div className="relative">
+                                        <MinimalInput label="No. of Diffusers" subLabel="Số miệng gió" value={totalDiffusers} onChange={(v) => setTotalDiffusers(Number(v))} />
+                                        <FormulaText>Q_each = Q_total / N</FormulaText>
+                                    </div>
                                 </div>
                             </div>
 
@@ -168,7 +184,8 @@
                                 <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 rounded-l-xl"></div>
                                 <div className="relative z-10">
                                     <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">
-                                        Airflow per Diffuser / <span className="font-normal normal-case italic">Lưu lượng 1 miệng</span>
+                                        Airflow per Diffuser
+                                        <span className="block font-medium italic text-slate-300 normal-case mt-0.5">Lưu lượng 1 miệng</span>
                                     </p>
                                     <div className="flex items-baseline gap-2 mt-1">
                                         <span className="text-4xl font-bold text-blue-600 tracking-tight">
@@ -176,6 +193,7 @@
                                         </span>
                                         <span className="text-slate-400 text-xs font-medium bg-slate-100 px-1.5 py-0.5 rounded">{tableUnit}</span>
                                     </div>
+                                    <FormulaText>Average distribution</FormulaText>
                                 </div>
                             </div>
                         </div>
@@ -198,8 +216,13 @@
                                 <table className="w-full text-left border-collapse">
                                     <thead className="bg-slate-50/50">
                                         <tr>
-                                            <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase w-14 text-center tracking-wider border-b border-slate-100">No. <span className="font-normal normal-case italic ml-0.5">/ STT</span></th>
-                                            <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase text-right tracking-wider border-b border-slate-100">Cumulative <span className="font-normal normal-case italic ml-0.5">/ Cộng dồn</span> <span className="normal-case">({tableUnit})</span></th>
+                                            <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase w-14 text-center tracking-wider border-b border-slate-100">
+                                                No. <span className="block font-medium normal-case italic mt-0.5">STT</span>
+                                            </th>
+                                            <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase text-right tracking-wider border-b border-slate-100">
+                                                Cumulative <span className="normal-case">({tableUnit})</span>
+                                                <span className="block font-medium normal-case italic mt-0.5">Cộng dồn</span>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
@@ -409,44 +432,70 @@
                                 
                                 <div className="space-y-6">
                                     <div className="bg-slate-50 p-1 rounded-lg flex text-[10px] font-bold">
-                                        <button onClick={() => setMode('flow')} className={`flex-1 py-1.5 rounded-md transition-all ${mode === 'flow' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Flow Mode / Lưu Lượng</button>
-                                        <button onClick={() => setMode('size')} className={`flex-1 py-1.5 rounded-md transition-all ${mode === 'size' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Size Mode / Kích thước cũ</button>
+                                        <button onClick={() => setMode('flow')} className={`flex-1 py-1.5 rounded-md transition-all flex flex-col items-center justify-center leading-tight ${mode === 'flow' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                                            <span className="uppercase">Flow Mode</span>
+                                            <span className="font-normal italic text-[9px] opacity-70">Lưu Lượng</span>
+                                        </button>
+                                        <button onClick={() => setMode('size')} className={`flex-1 py-1.5 rounded-md transition-all flex flex-col items-center justify-center leading-tight ${mode === 'size' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                                            <span className="uppercase">Size Mode</span>
+                                            <span className="font-normal italic text-[9px] opacity-70">Kích thước cũ</span>
+                                        </button>
                                     </div>
 
                                     {mode === 'flow' ? (
                                         <div className="grid grid-cols-2 gap-4">
-                                            <MinimalInput label="Flow (L/s)" subLabel="Lưu lượng" value={flowLS} onChange={(v) => handleFlowChange(v, 'ls')} />
-                                            <MinimalInput label="Flow (m³/h)" subLabel="Lưu lượng" value={flowCMH} onChange={(v) => handleFlowChange(v, 'cmh')} />
+                                            <div className="relative">
+                                                <MinimalInput label="Flow (L/s)" subLabel="Lưu lượng" value={flowLS} onChange={(v) => handleFlowChange(v, 'ls')} />
+                                                <FormulaText>1 l/s = 3.6 m³/h</FormulaText>
+                                            </div>
+                                            <div className="relative">
+                                                <MinimalInput label="Flow (m³/h)" subLabel="Lưu lượng" value={flowCMH} onChange={(v) => handleFlowChange(v, 'cmh')} />
+                                                <FormulaText>1 m³/h = 0.278 l/s</FormulaText>
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-2 gap-4">
                                             <MinimalInput label="Width (mm)" subLabel="Rộng" value={oldW} onChange={setOldW} />
                                             <MinimalInput label="Height (mm)" subLabel="Cao" value={oldH} onChange={setOldH} />
+                                            <div className="col-span-2"><FormulaText>Q = W * H * v</FormulaText></div>
                                         </div>
                                     )}
 
                                     {showSettings && (
                                         <div className="bg-orange-50 p-3 rounded-lg animate-fade-in">
                                             <MinimalInput label="Roughness (mm)" subLabel="Độ nhám" value={roughness} onChange={setRoughness} step="0.01" />
+                                            <FormulaText>Galvanized Steel: 0.15mm</FormulaText>
                                         </div>
                                     )}
 
                                     <div className="space-y-3 pt-2">
-                                        <div className="flex flex-col gap-2">
-                                            <label className={`flex items-center gap-2 cursor-pointer group`}>
-                                                <input type="radio" name="calcMethod" checked={calcMethod === 'velocity'} onChange={() => setCalcMethod('velocity')} className="accent-blue-600" />
-                                                <span className="text-[10px] font-bold text-slate-500 uppercase group-hover:text-blue-600">Max Velocity / Vận tốc</span>
+                                        <div className="flex flex-col gap-3">
+                                            <label className={`flex items-start gap-3 cursor-pointer group`}>
+                                                <input type="radio" name="calcMethod" checked={calcMethod === 'velocity'} onChange={() => setCalcMethod('velocity')} className="accent-blue-600 mt-1" />
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] font-bold text-slate-600 uppercase group-hover:text-blue-600">Max Velocity</span>
+                                                    <span className="text-[10px] font-medium text-slate-400 italic">Theo Vận tốc</span>
+                                                </div>
                                             </label>
                                             {calcMethod === 'velocity' && (
-                                                <div className="pl-6"><MinimalInput label="Velocity (m/s)" subLabel="Vận tốc" value={velocityInput} onChange={setVelocityInput} /></div>
+                                                <div className="pl-7">
+                                                    <MinimalInput label="Velocity (m/s)" subLabel="Vận tốc" value={velocityInput} onChange={setVelocityInput} />
+                                                    <FormulaText>Recommended: 4-8 m/s</FormulaText>
+                                                </div>
                                             )}
 
-                                            <label className={`flex items-center gap-2 cursor-pointer group mt-2`}>
-                                                <input type="radio" name="calcMethod" checked={calcMethod === 'friction'} onChange={() => setCalcMethod('friction')} className="accent-blue-600" />
-                                                <span className="text-[10px] font-bold text-slate-500 uppercase group-hover:text-blue-600">Max Friction / Tổn thất</span>
+                                            <label className={`flex items-start gap-3 cursor-pointer group`}>
+                                                <input type="radio" name="calcMethod" checked={calcMethod === 'friction'} onChange={() => setCalcMethod('friction')} className="accent-blue-600 mt-1" />
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] font-bold text-slate-600 uppercase group-hover:text-blue-600">Max Friction</span>
+                                                    <span className="text-[10px] font-medium text-slate-400 italic">Theo Tổn thất</span>
+                                                </div>
                                             </label>
                                             {calcMethod === 'friction' && (
-                                                <div className="pl-6"><MinimalInput label="Friction (Pa/m)" subLabel="Tổn thất" value={frictionInput} onChange={setFrictionInput} /></div>
+                                                <div className="pl-7">
+                                                    <MinimalInput label="Friction (Pa/m)" subLabel="Tổn thất" value={frictionInput} onChange={setFrictionInput} />
+                                                    <FormulaText>Standard: 0.8-1.5 Pa/m</FormulaText>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -458,7 +507,10 @@
                                 <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 rounded-l-xl"></div>
                                 <div className="relative z-10 flex justify-between items-center">
                                     <div>
-                                        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Total Flow / <span className="font-normal italic">Lưu lượng</span></p>
+                                        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">
+                                            Total Flow
+                                            <span className="block font-medium italic text-slate-300 normal-case mt-0.5">Lưu lượng</span>
+                                        </p>
                                         <span className="text-2xl font-bold text-slate-800">{Math.round(resFlow).toLocaleString()} <span className="text-xs font-normal">m³/h</span></span>
                                     </div>
                                     <div className="text-right">
@@ -478,6 +530,7 @@
                                 <div className="space-y-4">
                                     <MinimalInput label="Fixed Height (mm)" subLabel="Cao" value={fixedH} onChange={setFixedH} />
                                     <MinimalInput label="Calc Width (mm)" subLabel="Rộng" value={fixedW} onChange={setFixedW} />
+                                    <FormulaText>A = Q / v</FormulaText>
                                     
                                     <div className="grid grid-cols-2 gap-2 mt-2">
                                         <div className="bg-slate-50 p-2 rounded border border-slate-100">
@@ -623,19 +676,35 @@
                                 </div>
                                 <div className="space-y-6">
                                     <div className="grid grid-cols-2 gap-4">
-                                        <MinimalInput label="Flow (L/s)" subLabel="Lưu lượng" value={flowLS} onChange={handleLSChange} />
-                                        <MinimalInput label="Flow (m³/h)" subLabel="Lưu lượng" value={flowCMH} onChange={handleCMHChange} />
+                                        <div className="relative">
+                                            <MinimalInput label="Flow (L/s)" subLabel="Lưu lượng" value={flowLS} onChange={handleLSChange} />
+                                            <FormulaText>1 l/s = 3.6 m³/h</FormulaText>
+                                        </div>
+                                        <div className="relative">
+                                            <MinimalInput label="Flow (m³/h)" subLabel="Lưu lượng" value={flowCMH} onChange={handleCMHChange} />
+                                            <FormulaText>1 m³/h = 0.278 l/s</FormulaText>
+                                        </div>
                                     </div>
-                                    <MinimalInput label="Velocity (m/s)" subLabel="Vận tốc Max" value={velocity} onChange={setVelocity} step="0.1" />
-                                    <MinimalInput label="Free Area (%)" subLabel="Diện tích thoáng" value={surface} onChange={setSurface} />
+                                    <div className="relative">
+                                        <MinimalInput label="Velocity (m/s)" subLabel="Vận tốc Max" value={velocity} onChange={setVelocity} step="0.1" />
+                                        <FormulaText>Limit: 2-3 m/s (Neck)</FormulaText>
+                                    </div>
+                                    <div className="relative">
+                                        <MinimalInput label="Free Area (%)" subLabel="Diện tích thoáng" value={surface} onChange={setSurface} />
+                                        <FormulaText>Supply: ~70-80%</FormulaText>
+                                    </div>
                                 </div>
                             </div>
                             
                             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 relative overflow-hidden">
                                 <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 rounded-l-xl"></div>
                                 <div className="relative z-10">
-                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Required Neck Area / <span className="font-normal italic">Diện tích cổ</span></p>
+                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">
+                                        Required Neck Area
+                                        <span className="block font-medium italic text-slate-300 normal-case mt-0.5">Diện tích cổ</span>
+                                    </p>
                                     <span className="text-3xl font-bold text-emerald-600">{requiredArea.toLocaleString()} <span className="text-xs font-normal text-slate-400">mm²</span></span>
+                                    <FormulaText>A_neck = Q / (v * %)</FormulaText>
                                 </div>
                             </div>
 
