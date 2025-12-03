@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Duct/AG Calculator</title>
+    <title>HVAC Unified Calculator</title>
     
     <!-- 1. React & ReactDOM CDN -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -64,13 +64,18 @@
             </div>
         );
 
-        // --- COMPONENT: FLOATING INPUT ---
+        // --- COMPONENT: FLOATING INPUT (Updated onFocus) ---
         const FloatingInput = ({ id, label, value, onChange, type = "number", step = "1", suffix, formula }) => (
             <div className="relative z-0 w-full group mt-1">
                 <input
                     type={type} id={id}
                     className="block py-2.5 px-0 w-full text-lg text-slate-800 bg-transparent border-0 border-b-2 border-slate-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer font-bold font-mono"
-                    placeholder=" " value={value} onChange={(e) => onChange(e.target.value)} step={step} autoComplete="off"
+                    placeholder=" " 
+                    value={value} 
+                    onChange={(e) => onChange(e.target.value)} 
+                    onFocus={(e) => e.target.select()} /* Tự động bôi đen khi click */
+                    step={step} 
+                    autoComplete="off"
                 />
                 <label htmlFor={id} className="peer-focus:font-bold absolute text-sm text-slate-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 font-semibold whitespace-nowrap">
                     {label}
@@ -86,6 +91,14 @@
             const actual = parseFloat(actualVel);
             const limit = parseFloat(limitVel);
             return actual > limit ? "text-amber-600 bg-amber-50 border-amber-200" : "text-emerald-600 bg-emerald-50 border-emerald-200";
+        };
+
+        // --- HELPER: COLOR CLASS BASED ON FRICTION (Max 1 Pa/m) ---
+        const getFrictionColorClass = (loss) => {
+            if (!loss) return "text-slate-500";
+            const l = parseFloat(loss);
+            if (l > 1) return "text-red-600 font-bold";
+            return "text-orange-600 font-bold";
         };
 
         // --- COMPONENT 1: DUCT CALCULATOR ---
@@ -313,7 +326,9 @@
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm font-medium text-slate-500">Tổn thất (tham khảo):</span>
-                                    <span className="text-sm font-bold text-orange-600">{frictionLoss !== null ? `${frictionLoss.toFixed(2)} Pa/m` : '---'}</span>
+                                    <span className={`text-sm ${getFrictionColorClass(frictionLoss)}`}>
+                                        {frictionLoss !== null ? `${frictionLoss.toFixed(2)} Pa/m` : '---'}
+                                    </span>
                                 </div>
                             </div>
 
@@ -333,7 +348,7 @@
                                         </div>
                                         <div className="flex flex-col bg-slate-50 p-2 rounded border border-slate-100">
                                             <span className="text-[10px] font-semibold text-slate-500 uppercase">Tổn thất</span>
-                                            <span className="text-sm font-bold text-orange-600">
+                                            <span className={`text-sm ${getFrictionColorClass(customFriction)}`}>
                                                 {customFriction ? `${customFriction} Pa/m` : '---'}
                                             </span>
                                         </div>
@@ -394,7 +409,7 @@
                                                             {s.actualVelocity} m/s
                                                         </span>
                                                     </td>
-                                                    <td className="p-3 text-orange-600 font-medium text-xs">{s.frictionLoss}</td>
+                                                    <td className={`p-3 text-xs ${getFrictionColorClass(s.frictionLoss)}`}>{s.frictionLoss}</td>
                                                     <td className="p-3 text-right">
                                                         <button onClick={() => addToSavedList(s)} className="text-xs bg-white border border-slate-200 px-2 py-1 rounded hover:border-blue-500 hover:text-blue-600">Chọn</button>
                                                     </td>
